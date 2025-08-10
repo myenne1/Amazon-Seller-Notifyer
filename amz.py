@@ -83,23 +83,24 @@ def fetch_recent_orders(minutes: int = POLL_WINDOW_MINUTES) -> List[Dict[str, An
     return results
 
 def process_order(order_id, units_sold, amount, purchase_date, is_business, cancelled):
+    total_price = units_sold * settings.LIST_PRICE
     if cancelled:
         prev = get_order_status(order_id)
         if prev != "Canceled":
             send_telegram_message(f"‼⚠️ Order was canceled\nOrder ID: {order_id}")
-            insert_order(order_id, units_sold, amount, purchase_date, is_business, status="Canceled")
+            insert_order(order_id, units_sold, total_price, purchase_date, is_business, status="Canceled")
             return
         
     if order_exists(order_id):
         print(f"Skipping duplicate order: {order_id}")
         return
-    insert_order(order_id, units_sold, amount, purchase_date, is_business)
+    insert_order(order_id, units_sold, total_price, purchase_date, is_business)
     
-    total_price = f"${units_sold * settings.LIST_PRICE:.2f}"
+    total_price_str = f"${total_price:.2f}"
     if is_business:
-        send_telegram_message(f"[💸 Cha-Ching!]\n{units_sold} unit(s) sold for {total_price}\nBusiness Order!\nOrder ID: {order_id}")
+        send_telegram_message(f"[💸 Cha-Ching!]\n{units_sold} unit(s) sold for {total_price_str}\nBusiness Order!\nOrder ID: {order_id}")
     else:
-        send_telegram_message(f"[💸 Cha-Ching!]\n{units_sold} unit(s) sold for {total_price}\nOrder ID: {order_id}")
+        send_telegram_message(f"[💸 Cha-Ching!]\n{units_sold} unit(s) sold for {total_price_str}\nOrder ID: {order_id}")
         
     print(f"New order logged + notified: {order_id}")
 
@@ -169,5 +170,5 @@ def test_list_orders():
 
     print("TOTAL orders:", len(orders))
     
-if __name__ == "__main__":
-    poll_and_notify()
+# if __name__ == "__main__":
+#     poll_and_notify()
