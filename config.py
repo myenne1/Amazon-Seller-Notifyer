@@ -37,6 +37,7 @@ class Settings(BaseSettings):
 
     # Polling window in minutes
     POLL_WINDOW_MINUTES: int
+    LIST_PRICE: float
 
     class Config:
         env_file = ".env"

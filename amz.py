@@ -86,7 +86,7 @@ def process_order(order_id, units_sold, amount, purchase_date, is_business, canc
     if cancelled:
         prev = get_order_status(order_id)
         if prev != "Canceled":
-            send_telegram_message(f"Order was canceled\nOrder ID: {order_id}")
+            send_telegram_message(f"‼⚠️ Order was canceled\nOrder ID: {order_id}")
             insert_order(order_id, units_sold, amount, purchase_date, is_business, status="Canceled")
             return
         
@@ -95,10 +95,11 @@ def process_order(order_id, units_sold, amount, purchase_date, is_business, canc
         return
     insert_order(order_id, units_sold, amount, purchase_date, is_business)
     
+    total_price = f"${units_sold * settings.LIST_PRICE:.2f}"
     if is_business:
-        send_telegram_message(f"[💸 Cha-Ching!]\n{units_sold} unit(s) sold\nBusiness Order!")
+        send_telegram_message(f"[💸 Cha-Ching!]\n{units_sold} unit(s) sold for {total_price}\nBusiness Order!\nOrder ID: {order_id}")
     else:
-        send_telegram_message(f"[💸 Cha-Ching!]\n{units_sold} unit(s) sold")
+        send_telegram_message(f"[💸 Cha-Ching!]\n{units_sold} unit(s) sold for {total_price}\nOrder ID: {order_id}")
         
     print(f"New order logged + notified: {order_id}")
 
@@ -167,3 +168,6 @@ def test_list_orders():
         orders.extend(more)
 
     print("TOTAL orders:", len(orders))
+    
+if __name__ == "__main__":
+    poll_and_notify()
