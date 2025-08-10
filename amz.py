@@ -87,7 +87,7 @@ def process_order(order_id, units_sold, amount, purchase_date, is_business, canc
     if cancelled:
         prev = get_order_status(order_id)
         if prev != "Canceled":
-            send_telegram_message(f"‼⚠️ Order was canceled\nOrder ID: {order_id}")
+            send_telegram_message(f"⚠️ Order was canceled\nOrder ID: {order_id}")
             insert_order(order_id, units_sold, total_price, purchase_date, is_business, status="Canceled")
             return
         
