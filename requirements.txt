@@ -1,0 +1,5 @@
+supabase
+fastapi
+uvicorn
+requests
+python-amazon-sp-api==0.19.3
