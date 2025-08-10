@@ -167,7 +167,3 @@ def test_list_orders():
         orders.extend(more)
 
     print("TOTAL orders:", len(orders))
-
-
-if __name__ == "__main__":
-    poll_and_notify()

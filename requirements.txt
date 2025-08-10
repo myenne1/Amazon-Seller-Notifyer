@@ -3,3 +3,6 @@ fastapi
 uvicorn
 requests
 python-amazon-sp-api==0.19.3
+pydantic-settings
+python-telegram-bot
+flask
