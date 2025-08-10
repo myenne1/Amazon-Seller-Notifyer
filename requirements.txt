@@ -2,7 +2,7 @@ supabase
 fastapi
 uvicorn
 requests
-python-amazon-sp-api==0.19.3
+python-amazon-sp-api
 pydantic-settings
 python-telegram-bot
 flask
