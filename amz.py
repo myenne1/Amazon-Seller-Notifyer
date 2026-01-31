@@ -10,7 +10,7 @@ from messager import send_telegram_message
 
 POLL_WINDOW_MINUTES = settings.POLL_WINDOW_MINUTES
 
-def _orders_client() -> Orders:
+def get_client() -> Orders:
     # Prefer STS if present; else fall back to IAM user. Role ARN is optional.
     aws_access_key = settings.STS_ACCESS_KEY_ID or settings.IAM_USER_ACCESS_KEY_ID
     aws_secret_key = settings.STS_SECRET_ACCESS_KEY or settings.IAM_USER_SECRET
@@ -30,15 +30,15 @@ def _orders_client() -> Orders:
     client = Orders(credentials=credentials)
     return client
 
-def fetch_recent_orders(minutes: int = POLL_WINDOW_MINUTES) -> List[Dict[str, Any]]:
-    client = _orders_client()
+def fetch_recent_orders(client, minutes: int = POLL_WINDOW_MINUTES) -> List[Dict[str, Any]]:
+    client = get_client()
     created_after_dt = datetime.now(timezone.utc) - timedelta(minutes=minutes)
     created_after = created_after_dt.replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
     try:
         resp = client.get_orders(
             MarketplaceIds=[settings.MARKETPLACE_ID],
-            CreatedAfter=created_after,
+            CreatedAfter=created_after
         )
     except SellingApiException as e:
         print(f"SP-API get_orders error: {e}")
@@ -82,8 +82,23 @@ def fetch_recent_orders(minutes: int = POLL_WINDOW_MINUTES) -> List[Dict[str, An
 
     return results
 
-def process_order(order_id, units_sold, amount, purchase_date, is_business, cancelled):
-    total_price = units_sold * settings.LIST_PRICE
+def get_order_items(client, order_id: str):
+    try:
+        response = client.get_order_items(order_id)
+        order_items = response.payload.get("OrderItems", [] or [])
+        return order_items
+    except SellingApiException as e:
+        print(f"SP-API get_order_items error for {order_id}: {e}")
+        return []
+
+def get_price(order_items):
+    price = order_items[0]["ItemPrice"]["Amount"]
+    return price
+
+def process_order(client: Orders, order_id, units_sold, amount, purchase_date, is_business, cancelled):
+    order_items = get_order_items(client, order_id)
+    total_price = get_price(order_items)
+    
     if cancelled:
         prev = get_order_status(order_id)
         if prev != "Canceled":
@@ -105,7 +120,8 @@ def process_order(order_id, units_sold, amount, purchase_date, is_business, canc
     print(f"New order logged + notified: {order_id}")
 
 def poll_and_notify() -> int:
-    orders = fetch_recent_orders(minutes=POLL_WINDOW_MINUTES)
+    client = get_client()
+    orders = fetch_recent_orders(client, minutes=POLL_WINDOW_MINUTES)
     processed = 0
     
     if len(orders) == 0:
@@ -124,8 +140,7 @@ def poll_and_notify() -> int:
         processed += 1
     return processed
 
-def test_list_orders():
-    client = _orders_client()
+def test_list_orders(client: Orders):
     created_after = (datetime.now(timezone.utc) - timedelta(days=20)) \
                       .replace(microsecond=0).isoformat().replace("+00:00","Z")
     print("DEBUG CreatedAfter:", created_after)

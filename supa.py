@@ -1,3 +1,4 @@
+from csv import Error
 from supabase import create_client, Client
 from config import settings
 
@@ -28,5 +29,15 @@ def get_order_status(order_id: str) -> str | None:
     if r.data:
         return r.data[0].get("status")
     return None
+
+def set_price(new_price):
+    try:
+        supabase.table("bot_settings").update({"price": new_price}).eq("id", 1).execute()
+    except Exception as e:
+        return Error("Unable to set price: ", e)
     
     
+    
+def get_price_setting() -> float | None:
+    r = supabase.table("bot_settings").select("price").eq("id", 1).execute()
+    return r.data[0].get('price')

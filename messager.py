@@ -2,6 +2,7 @@ import requests
 from config import settings
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
+from supa import set_price
 
 TELEGRAM_BOT_TOKEN = settings.TELEGRAM_BOT_TOKEN
 TELEGRAM_CHAT_ID = settings.TELEGRAM_CHAT_ID
@@ -16,3 +17,10 @@ def send_telegram_message(msg: str):
     response = requests.post(url, data=payload)
     response.raise_for_status()
     return response
+
+def handle_incoming_request(request):
+    if (float(request)):
+        set_price(request)
+        return True
+    else:
+        return False
