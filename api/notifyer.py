@@ -17,11 +17,4 @@ def health():
 
 @app.post("/api/telegram")
 def telegram_bot(request: Request):
-    reply = handle_incoming_request(request)
-    
-    if reply:
-        send_telegram_message(f"Price updated to {float(request)}!")
-        return {"Price updated!"}
-    else:
-        send_telegram_message(f"Couldn't update price, current price is {get_price_setting()}")
-        return {"Price couldn't be updated"}
+    handle_incoming_request(request)

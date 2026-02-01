@@ -30,14 +30,16 @@ def get_order_status(order_id: str) -> str | None:
         return r.data[0].get("status")
     return None
 
-def set_price(new_price):
+def set_price(new_price: float, asin: str):
     try:
-        supabase.table("bot_settings").update({"price": new_price}).eq("id", 1).execute()
+        supabase.table("bot_settings").update({"price": new_price}).eq("asin", asin).execute()
+        print(f"Price set to {new_price} for {asin}")
     except Exception as e:
         return Error("Unable to set price: ", e)
     
-    
-    
-def get_price_setting() -> float | None:
-    r = supabase.table("bot_settings").select("price").eq("id", 1).execute()
-    return r.data[0].get('price')
+def get_price_setting(asin: str) -> float | None:
+    r = supabase.table("bot_settings").select("price").eq("asin", asin).execute()
+    price = r.data[0].get('price')
+    return price
+
+# if __name__ == "__main__":

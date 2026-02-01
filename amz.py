@@ -1,11 +1,12 @@
 from datetime import datetime, timedelta, timezone
+from pydoc import cli
 from typing import List, Dict, Any
 from config import settings
 
 from sp_api.api import Orders
 from sp_api.base import SellingApiException
 from config import settings
-from supa import order_exists, insert_order, get_order_status
+from supa import get_price_setting, order_exists, insert_order, get_order_status
 from messager import send_telegram_message
 
 POLL_WINDOW_MINUTES = settings.POLL_WINDOW_MINUTES
@@ -92,12 +93,13 @@ def get_order_items(client, order_id: str):
         return []
 
 def get_price(order_items):
-    price = order_items[0]["ItemPrice"]["Amount"]
+    asin = order_items[0]["ASIN"]
+    price = get_price_setting(asin)
     return price
 
 def process_order(client: Orders, order_id, units_sold, amount, purchase_date, is_business, cancelled):
     order_items = get_order_items(client, order_id)
-    total_price = get_price(order_items)
+    total_price = get_price(order_items) * units_sold
     
     if cancelled:
         prev = get_order_status(order_id)
@@ -130,6 +132,7 @@ def poll_and_notify() -> int:
     for o in orders:
         # Use your existing dedupe + notify
         process_order(
+            client,
             o["order_id"],
             o["units"],
             f"{o['amount']:.2f}",
@@ -185,5 +188,5 @@ def test_list_orders(client: Orders):
 
     print("TOTAL orders:", len(orders))
     
-# if __name__ == "__main__":
-#     poll_and_notify()
+if __name__ == "__main__":
+    poll_and_notify()

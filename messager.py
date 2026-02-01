@@ -1,3 +1,4 @@
+from os import setpriority
 import requests
 from config import settings
 from telegram import Update
@@ -19,8 +20,22 @@ def send_telegram_message(msg: str):
     return response
 
 def handle_incoming_request(request):
+    if request == "/price":
+        handle_price(request)
+        
     if (float(request)):
         set_price(request)
         return True
     else:
         return False
+
+def handle_price(request: str):
+    split_text = request.split()
+    asin = split_text[1]
+    try:
+        new_price = float(split_text[2])
+    except Exception as e:
+        send_telegram_message("New price must be a float")
+    
+    set_price(new_price, asin)
+    send_telegram_message(f"Price for {asin} set to {new_price}")
