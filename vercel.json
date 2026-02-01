@@ -13,10 +13,6 @@
       {
         "src": "/",
         "dest": "api/notifyer.py"
-      },
-      {
-        "src": "/api/telegram",
-        "dest": "api/notifyer.py"
       }
     ]
   }
