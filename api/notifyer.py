@@ -16,5 +16,12 @@ def health():
     return {"ok": True, "service": "amazon-notifier"}
 
 @app.post("/api/telegram")
-def telegram_bot(request: Request):
-    handle_incoming_request(request)
+async def telegram_bot(request: Request):
+    update = await request.json()
+    message = update["message"]
+    if not message:
+        return {"ok": True}
+    
+    handle_incoming_request(message)
+    
+    return {"ok": True}
