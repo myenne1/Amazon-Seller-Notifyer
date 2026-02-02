@@ -20,6 +20,13 @@ def send_telegram_message(msg: str):
     return response
 
 def handle_incoming_request(message: dict):
+    id = message["message_id"]
+    is_bot = message["is_bot"]
+    new_text = message["text"]
+    print(f"id: {id}")
+    print(f"bot: {is_bot}")
+    print(f"text: {new_text}")
+    
     text = (message.get("text") or "").strip()
 
     if not text:
