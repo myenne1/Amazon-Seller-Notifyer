@@ -1,5 +1,4 @@
-from requests import Request
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from amz import poll_and_notify
 from messager import handle_incoming_request, send_telegram_message
 from supa import get_price_setting
@@ -16,12 +15,13 @@ def health():
     return {"ok": True, "service": "amazon-notifier"}
 
 @app.post("/api/telegram")
-async def telegram_bot(request: Request):
-    update = await request.json()
-    message = update["message"]
-    if not message:
+def telegram_bot(request: request):
+    update = request.get_json(silent=True)
+    
+    if not update or "message" not in update:
         return {"ok": True}
     
+    message = update["message"]
     handle_incoming_request(message)
     
     return {"ok": True}
