@@ -11,6 +11,10 @@ def order_exists(order_id: str) -> bool:
     result = supabase.table("orders").select("order_id").eq("order_id", order_id).execute()
     return len(result.data) > 0
 
+def asin_exists(asin: str):
+    result = supabase.table("bot_settings").select("asin").eq("asin", asin).execute()
+    return len(result.data) > 0
+
 def insert_order(order_id: str, units_sold: int, amount: float, purchase_date: str, is_business: bool, status: str = "New"):
     supabase.table("orders").upsert(
         {
@@ -43,3 +47,4 @@ def get_price_setting(asin: str) -> float | None:
     return price
 
 # if __name__ == "__main__":
+#     print(asin_exists("B0F8LMQN9P"))

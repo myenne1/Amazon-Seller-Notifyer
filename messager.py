@@ -1,7 +1,7 @@
 from os import setpriority
 import requests
 from config import settings
-from supa import set_price
+from supa import asin_exists, set_price
 
 TELEGRAM_BOT_TOKEN = settings.TELEGRAM_BOT_TOKEN
 TELEGRAM_CHAT_ID = settings.TELEGRAM_CHAT_ID
@@ -64,7 +64,15 @@ def handle_price(chat_id: int, text: str):
         )
         return
 
-    asin = split_text[1].strip()
+    if split_text[1].strip() == "36000":
+        asin = "B0F8LMQN9P"
+        
+    elif split_text[1].strip() == "24000":
+        asin = 'B0DC8R7LT2'
+    
+    if not asin_exists(asin):
+        send_telegram_message("Could not find asin.", chat_id)
+        
     price_str = split_text[2].strip()
 
     try:
