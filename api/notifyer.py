@@ -18,8 +18,6 @@ def health():
 def telegram_bot():
     update = request.get_json(silent=True)
     
-    message = update["text"]
-    print(message)
-    handle_incoming_request(message)
+    handle_incoming_request(update)
     
     return {"ok": True}
