@@ -15,7 +15,7 @@ def health():
     return {"ok": True, "service": "amazon-notifier"}
 
 @app.post("/api/telegram")
-def telegram_bot(request: request):
+def telegram_bot():
     update = request.get_json(silent=True)
     
     if not update or "message" not in update:
