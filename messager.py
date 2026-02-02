@@ -19,20 +19,41 @@ def send_telegram_message(msg: str):
     response.raise_for_status()
     return response
 
-def handle_incoming_request(request):
-    if "/price" in request:
-        handle_price(request)
-    else:
-        send_telegram_message("couldn't process request")
-        return 0
+def handle_incoming_request(message: dict):
+    text = (message.get("text") or "").strip()
 
-def handle_price(request: str):
-    split_text = request.split()
-    asin = split_text[1]
+    if not text:
+        send_telegram_message("Empty message received.")
+        return
+
+    if text.startswith("/price"):
+        handle_price(text)
+        return
+
+    send_telegram_message("Couldn't process request. Try: /price <ASIN> <PRICE>")
+
+def handle_price(chat_id: int, text: str):
+    split_text = text.split()
+
+    if len(split_text) != 3:
+        send_telegram_message(
+            chat_id,
+            "Usage: /price <ASIN> <PRICE>\nExample: /price B0DC8R7LT2 42.95"
+        )
+        return
+
+    asin = split_text[1].strip()
+    price_str = split_text[2].strip()
+
     try:
-        new_price = float(split_text[2])
-    except Exception as e:
-        send_telegram_message("New price must be a float")
-    
+        new_price = float(price_str)
+    except ValueError:
+        send_telegram_message(chat_id, "New price must be a number. Example: 42.95")
+        return
+
+    if new_price <= 0:
+        send_telegram_message(chat_id, "Price must be greater than 0.")
+        return
+
     set_price(new_price, asin)
-    send_telegram_message(f"Price for {asin} set to {new_price}")
+    send_telegram_message(chat_id, f"Price for {asin} set to {new_price:.2f}")
