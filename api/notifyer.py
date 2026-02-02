@@ -18,10 +18,6 @@ def health():
 def telegram_bot():
     update = request.get_json(silent=True)
     
-    if "text" not in update:
-        print("Couldn't detect text in update")
-        return {"ok": True}
-    
     message = update["text"]
     print(message)
     handle_incoming_request(message)
