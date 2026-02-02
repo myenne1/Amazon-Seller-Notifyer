@@ -22,6 +22,7 @@ def telegram_bot():
         return {"ok": True}
     
     message = update["message"]
+    print(message)
     handle_incoming_request(message)
     
     return {"ok": True}
