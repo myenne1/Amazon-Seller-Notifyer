@@ -20,14 +20,11 @@ def send_telegram_message(msg: str):
     return response
 
 def handle_incoming_request(request):
-    if request == "/price":
+    if "/price" in request:
         handle_price(request)
-        
-    if (float(request)):
-        set_price(request)
-        return True
     else:
-        return False
+        send_telegram_message("couldn't process request")
+        return 0
 
 def handle_price(request: str):
     split_text = request.split()
