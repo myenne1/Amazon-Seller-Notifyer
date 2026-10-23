@@ -46,5 +46,11 @@ def get_price_setting(asin: str) -> float | None:
     price = r.data[0].get('price')
     return price
 
+def get_product_name(asin: str) -> str | None:
+    r = supabase.table("bot_settings").select("name").eq("asin", asin).limit(1).execute()
+    if r.data:
+        return r.data[0].get("name")
+    return None
+
 # if __name__ == "__main__":
 #     print(asin_exists("B0F8LMQN9P"))

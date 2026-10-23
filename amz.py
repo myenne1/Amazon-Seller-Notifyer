@@ -6,7 +6,7 @@ from config import settings
 from sp_api.api import Orders
 from sp_api.base import SellingApiException
 from config import settings
-from supa import get_price_setting, order_exists, insert_order, get_order_status
+from supa import get_price_setting, get_product_name, order_exists, insert_order, get_order_status
 from messager import send_telegram_message
 
 POLL_WINDOW_MINUTES = settings.POLL_WINDOW_MINUTES
@@ -100,11 +100,12 @@ def get_price(order_items):
 def process_order(client: Orders, order_id, units_sold, amount, purchase_date, is_business, cancelled):
     order_items = get_order_items(client, order_id)
     total_price = get_price(order_items) * units_sold
-    
+    product_name = get_product_name(order_items[0]["ASIN"]) or order_items[0]["ASIN"]
+
     if cancelled:
         prev = get_order_status(order_id)
         if prev != "Canceled":
-            send_telegram_message(f"⚠️ Order was canceled\nOrder ID: {order_id}")
+            send_telegram_message(f"⚠️ Order was canceled\nProduct: {product_name}\nOrder ID: {order_id}")
             insert_order(order_id, units_sold, total_price, purchase_date, is_business, status="Canceled")
             return
         
@@ -115,9 +116,9 @@ def process_order(client: Orders, order_id, units_sold, amount, purchase_date, i
     
     total_price_str = f"${total_price:.2f}"
     if is_business:
-        send_telegram_message(f"[💸 Cha-Ching!]\n{units_sold} unit(s) sold for {total_price_str}\nBusiness Order!\nOrder ID: {order_id}")
+        send_telegram_message(f"[💸 Cha-Ching!]\n{product_name} sold {units_sold} unit(s) for {total_price_str}\nBusiness Order!\nOrder ID: {order_id}")
     else:
-        send_telegram_message(f"[💸 Cha-Ching!]\n{units_sold} unit(s) sold for {total_price_str}\nOrder ID: {order_id}")
+        send_telegram_message(f"[💸 Cha-Ching!]\n{product_name} sold {units_sold} unit(s) for {total_price_str}\nOrder ID: {order_id}")
         
     print(f"New order logged + notified: {order_id}")
 

@@ -69,6 +69,9 @@ def handle_price(chat_id: int, text: str):
         
     elif split_text[1].strip() == "24000":
         asin = 'B0DC8R7LT2'
+
+    elif split_text[1].strip() == "sotha":
+        asin = 'B0HDXG2C5J'
     
     if not asin_exists(asin):
         send_telegram_message("Could not find asin.", chat_id)
